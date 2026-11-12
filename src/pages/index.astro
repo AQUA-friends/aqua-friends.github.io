@@ -1,0 +1,268 @@
+---
+import Base from '../layouts/Base.astro';
+
+const statement =
+  'Climate models now resolve storms, eddies and coastlines, kilometre by kilometre, hour by hour. Their output is measured in petabytes. AQUA turns it into answers.';
+
+const stats = [
+  { n: '1 PB', l: 'one 30-year, 5 km simulation' },
+  { n: '35 TB', l: 'per simulated year' },
+  { n: '10s TB', l: 'delivered per day by Climate DT' },
+  { n: '1', l: 'line of Python to read it all' },
+];
+
+const steps = [
+  { t: 'Catalog', d: 'Intake catalogs describe every model, experiment and source. You ask by name, not by path.', lines: [1, 2] },
+  { t: 'Reader', d: 'One entry point for GRIB, NetCDF, Zarr, FDB and more. Lazy, Dask-powered, out-of-core.', lines: [4, 5] },
+  { t: 'Fixer', d: 'Units, names and coordinates harmonised to a common data model, so models become comparable.', lines: [6] },
+  { t: 'Regridder', d: 'Fast, parallel regridding with smmregrid: precomputed CDO weights applied as sparse matrices.', lines: [7] },
+  { t: 'Timstat · Fldstat', d: 'Area-weighted field statistics and time aggregation, ready for science.', lines: [8, 9] },
+];
+
+const figs = [
+  { src: '/figures/ssh-agulhas.png', tag: 'Frontier', t: 'Sea surface height variability', d: 'Eddies of the Agulhas current, resolved by IFS-NEMO.' },
+  { src: '/figures/cyclones.png', tag: 'Frontier', t: 'Tropical cyclones', d: 'Detection and tracking at km-scale, with wind fields along the track.' },
+  { src: '/figures/seaice.png', tag: 'State of the art', t: 'Sea ice', d: 'Arctic sea-ice fraction in March and September versus OSI-SAF.' },
+  { src: '/figures/teleconnections.png', tag: 'State of the art', t: 'Teleconnections', d: 'ENSO regression patterns compared with ERA5.' },
+  { src: '/figures/climatology.png', tag: 'State of the art', t: 'Global biases & climatologies', d: 'Maps, zonal means and vertical profiles against reference datasets.' },
+  { src: '/figures/ecmean.png', tag: 'State of the art', t: 'ECmean performance indices', d: 'One heatmap to score a model against CMIP6, region by region and season by season.' },
+];
+
+const sota = ['Global biases', 'Timeseries', 'Seasonal cycles', 'Gregory plot', 'ECmean', 'Radiation boxplots', 'Sea ice', 'Teleconnections', 'Ocean drift', 'Ocean trends', 'Ocean stratification', 'Lat-lon profiles', 'Histograms', 'Ensemble'];
+const frontier = ['SSH variability', 'Tropical cyclones', 'Tropical rainfall'];
+const formats = ['GRIB', 'NetCDF', 'Zarr', 'FDB', 'Polytope', 'Parquet', 'ARCO', 'HEALPix'];
+---
+<Base>
+  <nav class="nav">
+    <div class="wrap">
+      <a class="brand" href="#top"><img src="/favicon.svg" alt="" />AQUA</a>
+      <ul>
+        <li><a href="#core">Core</a></li>
+        <li><a href="#diagnostics">Diagnostics</a></li>
+        <li><a href="#analysis">Analysis</a></li>
+        <li><a href="#ecosystem">Ecosystem</a></li>
+      </ul>
+      <a class="btn btn-primary btn-sm" href="#start">Get started</a>
+    </div>
+  </nav>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero" data-hero>
+      <div class="hero-inner">
+        <div class="hero-media" data-hero-media>
+          <img src="/figures/hero-ssh.jpg" alt="Sea surface height variability in the Agulhas region simulated by IFS-NEMO" />
+        </div>
+        <div class="hero-copy" data-hero-copy>
+          <p class="eyebrow hero-eyebrow">Destination Earth · Climate DT</p>
+          <h1 class="h-xl">AQUA<span class="grad-text">.</span></h1>
+          <p>Evaluate km-scale climate models.<br />At petabyte scale.</p>
+        </div>
+        <div class="scroll-hint" aria-hidden="true"></div>
+        <div class="hero-caption">Sea surface height variability, IFS-NEMO, Agulhas current — made with AQUA-diagnostics</div>
+      </div>
+    </section>
+
+    <!-- STATEMENT -->
+    <section class="statement">
+      <div class="wrap">
+        <p data-words>{statement.split(' ').map((w) => <span class="w">{w} </span>)}</p>
+      </div>
+    </section>
+
+    <div class="wrap">
+      <div class="stats reveal">
+        {stats.map((s) => <div class="stat"><b class="grad-text">{s.n}</b><span>{s.l}</span></div>)}
+      </div>
+    </div>
+
+    <!-- ACCESS / PROCESS / ANALYSE -->
+    <section class="wrap" style="padding-bottom:18vh">
+      <div class="split">
+        <div>
+          <p class="eyebrow reveal">One framework</p>
+          <h2 class="h-lg reveal">Access.<br />Process.<br /><span class="grad-text">Analyse.</span></h2>
+          <p class="lead reveal" style="margin-top:28px">
+            <strong>AQUA core</strong> gives you standard, Dask-enabled Xarray objects from any source.
+            <strong>AQUA-diagnostics</strong> turns them into automatic model evaluation, with graphics, provenance and a dashboard backend.
+          </p>
+        </div>
+        <figure class="paper-fig white reveal">
+          <img src="/figures/paper/gmd-f02.png" alt="Schematic of AQUA: Access, Process and Analyse blocks" loading="lazy" />
+          <figcaption>Nurisso et al., GMD 2026 (CC BY 4.0)</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- PIPELINE -->
+    <section class="pipeline" id="core" data-pipeline>
+      <div class="wrap pipeline-inner">
+        <div class="pipe-steps">
+          <div class="pipe-head">
+            <p class="eyebrow">AQUA core</p>
+            <h2 class="h-md">From petabytes to a <span class="grad-text">DataArray</span>.</h2>
+          </div>
+          {steps.map((s, i) => (
+            <div class={`pipe-step${i === 0 ? ' active' : ''}`} data-step={i} data-lines={s.lines.join(',')}>
+              <h3>{s.t}</h3>
+              <p>{s.d}</p>
+            </div>
+          ))}
+        </div>
+        <div class="code-card" aria-label="AQUA Python example">
+          <div class="dots"><i></i><i></i><i></i></div>
+          <pre><code><span class="ln" data-ln="1"><span class="tk-c"># browse what is available</span></span><span class="ln" data-ln="2"><span class="tk-k">from</span> aqua <span class="tk-k">import</span> Reader</span><span class="ln" data-ln="3"> </span><span class="ln" data-ln="4">reader = <span class="tk-f">Reader</span>(model=<span class="tk-s">'IFS-NEMO'</span>, exp=<span class="tk-s">'historical-1990'</span>,</span><span class="ln" data-ln="5">                source=<span class="tk-s">'lra-r100-monthly'</span>, regrid=<span class="tk-s">'r100'</span>)</span><span class="ln" data-ln="6">data = reader.<span class="tk-f">retrieve</span>()          <span class="tk-c"># fixed, lazy xarray</span></span><span class="ln" data-ln="7">t2m = reader.<span class="tk-f">regrid</span>(data[<span class="tk-s">'2t'</span>])</span><span class="ln" data-ln="8">gm = reader.<span class="tk-f">fldmean</span>(t2m)           <span class="tk-c"># area-weighted</span></span><span class="ln" data-ln="9">yearly = reader.<span class="tk-f">timmean</span>(gm, freq=<span class="tk-s">'yearly'</span>)</span></code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap" style="padding:12vh var(--gutter) 0">
+      <figure class="paper-fig white wide reveal">
+        <img src="/figures/paper/gmd-f03.png" alt="AQUA components: Catalog feeding the Reader, with Fixer, Regridder, Backend, Timstat and Fldstat modules" loading="lazy" />
+        <figcaption>The Reader and its modules. Nurisso et al., GMD 2026 (CC BY 4.0)</figcaption>
+      </figure>
+    </section>
+
+    <!-- FORMATS -->
+    <section class="formats">
+      <div class="wrap">
+        <p class="eyebrow reveal">Every format. One interface.</p>
+        <h2 class="h-md reveal">Whatever the model writes, AQUA reads.</h2>
+      </div>
+      <div class="marquee" aria-hidden="true">
+        {[...formats, ...formats].map((f) => <span>{f}</span>)}
+      </div>
+    </section>
+
+    <!-- DIAGNOSTICS INTRO -->
+    <section class="diag-intro" id="diagnostics">
+      <div class="wrap">
+        <p class="eyebrow reveal">AQUA-diagnostics</p>
+        <h2 class="h-xl reveal">See the <span class="grad-text">climate</span>.</h2>
+        <p class="lead reveal">A full suite of scientific diagnostics, built on AQUA, run online while the simulations are still going.</p>
+      </div>
+    </section>
+
+    <!-- GALLERY -->
+    <section class="gallery" data-gallery>
+      <div class="gallery-track" data-track>
+        {figs.map((f) => (
+          <article class="fig-card">
+            <div class="img"><img src={f.src} alt={f.t} loading="lazy" /></div>
+            <div class="meta">
+              <p class="eyebrow">{f.tag}</p>
+              <h3>{f.t}</h3>
+              <p>{f.d}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <!-- DIAG GRID -->
+    <section class="diag-grid-sec">
+      <div class="wrap">
+        <h2 class="h-lg reveal">Proven science.<br /><span class="grad-text">New frontiers.</span></h2>
+        <div class="diag-cols">
+          <div class="diag-col sota reveal">
+            <h3>State of the art</h3>
+            <p>The classic model-evaluation toolbox, reimagined for km-scale data.</p>
+            <div class="chips">{sota.map((s) => <span class="chip">{s}</span>)}</div>
+          </div>
+          <div class="diag-col frontier reveal">
+            <h3>Frontier</h3>
+            <p>Diagnostics that only make sense when models resolve the small scales.</p>
+            <div class="chips">{frontier.map((s) => <span class="chip">{s}</span>)}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLI -->
+    <section class="cli" id="analysis">
+      <div class="wrap">
+        <p class="eyebrow reveal">aqua analysis</p>
+        <h2 class="h-lg reveal">One command.<br />Every diagnostic.</h2>
+        <p class="lead reveal" style="margin-top:24px">Run the whole suite in parallel on HPC, then push the figures to the online dashboard.</p>
+        <div class="cli-box reveal">
+          <pre><span class="prompt">$</span> aqua analysis -m IFS-NEMO -e historical-1990 -s lra-r100-monthly
+<span class="out"><span class="ok">✓</span> timeseries   <span class="ok">✓</span> global biases   <span class="ok">✓</span> ecmean   <span class="ok">✓</span> sea ice
+<span class="ok">✓</span> teleconnections   <span class="ok">✓</span> ocean drift   <span class="ok">✓</span> ocean trends   …</span>
+<span class="prompt">$</span> aqua push ./output climatedt-phase1/IFS-NEMO/historical-1990</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ECOSYSTEM -->
+    <section class="eco" id="ecosystem">
+      <div class="wrap">
+        <p class="eyebrow reveal">Ecosystem</p>
+        <h2 class="h-lg reveal">Standing on the<br /><span class="grad-text">open Python stack</span>.</h2>
+        <figure class="paper-fig white wide reveal" style="margin-top:48px">
+          <img src="/figures/paper/gmd-f01.png" alt="AQUA dependencies: climate data, Intake, Xarray, Dask, AQUA core and AQUA-diagnostics" loading="lazy" />
+          <figcaption>Nurisso et al., GMD 2026 (CC BY 4.0)</figcaption>
+        </figure>
+        <div class="eco-grid">
+          <a class="eco-card reveal" href="https://github.com/DestinE-Climate-DT/AQUA">
+            <p class="eyebrow">Core</p><h3>AQUA</h3>
+            <p>Data access, fixing, regridding and statistics for high-resolution climate data.</p>
+            <span class="arrow">GitHub →</span>
+          </a>
+          <a class="eco-card reveal" href="https://github.com/DestinE-Climate-DT/AQUA-diagnostics">
+            <p class="eyebrow">Science</p><h3>AQUA-diagnostics</h3>
+            <p>The diagnostic suite for online monitoring of Climate DT simulations.</p>
+            <span class="arrow">GitHub →</span>
+          </a>
+          <a class="eco-card reveal" href="https://github.com/jhardenberg/smmregrid">
+            <p class="eyebrow">Engine</p><h3>smmregrid</h3>
+            <p>Sparse-matrix regridding with CDO weights, parallel and lazy with Dask.</p>
+            <span class="arrow">GitHub →</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- START -->
+    <section class="start" id="start">
+      <div class="wrap">
+        <h2 class="h-xl reveal">Dive in<span class="grad-text">.</span></h2>
+        <p class="lead reveal">Open source, Apache 2.0. Available on PyPI and conda-forge.</p>
+        <div class="install reveal"><code><span style="color:var(--accent)">$</span> pip install aqua-core aqua-diagnostics</code></div>
+        <div class="cta reveal">
+          <a class="btn btn-primary" href="https://aqua.readthedocs.io/en/latest/">Read the docs</a>
+          <a class="btn btn-ghost" href="https://doi.org/10.5194/gmd-19-7725-2026">Read the paper</a>
+          <a class="btn btn-ghost" href="https://github.com/DestinE-Climate-DT/AQUA">GitHub</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="cols">
+        <div><strong style="color:var(--text)">AQUA</strong><br />Application for QUality Assessment</div>
+        <div>Docs<ul>
+          <li><a href="https://aqua.readthedocs.io/en/latest/">AQUA core</a></li>
+          <li><a href="https://aqua-diagnostics.readthedocs.io/en/latest/">AQUA-diagnostics</a></li>
+        </ul></div>
+        <div>Cite<ul>
+          <li><a href="https://doi.org/10.5194/gmd-19-7725-2026">Nurisso et al., GMD 2026</a></li>
+          <li><a href="https://doi.org/10.5281/zenodo.14906075">AQUA on Zenodo</a></li>
+        </ul></div>
+        <div>Destination Earth<ul>
+          <li><a href="https://destine.ecmwf.int/">destine.ecmwf.int</a></li>
+          <li><a href="https://destination-earth.eu/">destination-earth.eu</a></li>
+        </ul></div>
+      </div>
+      <p class="fine">
+        AQUA is developed within Destination Earth, funded by the European Union through Contract DE_340_CSC — Destination Earth Programme Climate Adaptation Digital Twin (Climate DT).
+        Schematics from Nurisso et al. (2026), Geosci. Model Dev., 19, 7725–7740, licensed CC BY 4.0. This is a community page by aqua-friends.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    import { initMotion } from '../scripts/motion.js';
+    initMotion();
+  </script>
+</Base>
