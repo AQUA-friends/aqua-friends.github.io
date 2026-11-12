@@ -237,3 +237,8 @@ footer .fine { margin-top: 32px; max-width: 80ch; line-height: 1.6; }
   .hero-eyebrow { white-space: normal; }
   .hero-media img { object-position: 35% 50%; }
 }
+
+/* AQUA logo */
+.brand-logo { height: 18px !important; width: auto !important; }
+.hero-logo { margin: 0; line-height: 0; }
+.hero-logo img { width: clamp(260px, 52vw, 720px); height: auto; margin: 0 auto; filter: drop-shadow(0 10px 50px rgba(0,0,0,.6)); }
